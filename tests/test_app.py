@@ -1,16 +1,18 @@
-import unittest
-from app import greet
 import os
 import sys
+import unittest
 
 # Add the project root (folder that contains app.py) to Python path
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from app import greet
+
 
 class TestApp(unittest.TestCase):
 
-
     def test_greet(self):
         self.assertEqual(greet("World"), "Hello, World!")
+
 
 if __name__ == "__main__":
     unittest.main()
