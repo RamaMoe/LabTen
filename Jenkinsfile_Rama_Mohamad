@@ -1,11 +1,13 @@
 pipeline {
     agent any
+
     environment {
         VIRTUAL_ENV = 'venv'
-        PYTHON_EXE = 'C:\\Users\\Rama\\AppData\\Local\\Programs\\Python\\Python312\\python.exe'
+        PYTHON_EXE  = 'C:\\Users\\Rama\\AppData\\Local\\Programs\\Python\\Python312\\python.exe'
     }
 
     stages {
+
         stage('Setup') {
             steps {
                 bat """
@@ -20,13 +22,17 @@ pipeline {
 
         stage('Lint') {
             steps {
-                bat "%VIRTUAL_ENV%\\Scripts\\flake8 app.py"
+                bat """
+                    %VIRTUAL_ENV%\\Scripts\\flake8 app.py
+                """
             }
         }
 
         stage('Test') {
             steps {
-                bat "%VIRTUAL_ENV%\\Scripts\\pytest --maxfail=1 --disable-warnings -q"
+                bat """
+                    %VIRTUAL_ENV%\\Scripts\\pytest --maxfail=1 --disable-warnings -q
+                """
             }
         }
 
@@ -41,7 +47,11 @@ pipeline {
 
         stage('Security Scan') {
             steps {
-                bat "%VIRTUAL_ENV%\\Scripts\\bandit -r ."
+                bat """
+                    chcp 65001 >NUL
+                    set PYTHONIOENCODING=utf-8
+                    %VIRTUAL_ENV%\\Scripts\\bandit -r . -f json -o bandit_report.json
+                """
             }
         }
 
