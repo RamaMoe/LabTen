@@ -2,18 +2,16 @@ pipeline {
     agent any
     environment {
         VIRTUAL_ENV = 'venv'
+        PYTHON_EXE = 'C:\\Users\\Rama\\AppData\\Local\\Programs\\Python\\Python312\\python.exe'
     }
 
     stages {
         stage('Setup') {
             steps {
                 bat """
-                    rem === Create virtual environment if it does not exist ===
                     if not exist %VIRTUAL_ENV% (
-                        python -m venv %VIRTUAL_ENV%
+                        "%PYTHON_EXE%" -m venv %VIRTUAL_ENV%
                     )
-
-                    rem === Upgrade pip and install dependencies ===
                     %VIRTUAL_ENV%\\Scripts\\python -m pip install --upgrade pip
                     %VIRTUAL_ENV%\\Scripts\\python -m pip install -r requirements.txt
                 """
@@ -22,24 +20,19 @@ pipeline {
 
         stage('Lint') {
             steps {
-                bat """
-                    %VIRTUAL_ENV%\\Scripts\\python -m flake8 app.py
-                """
+                bat "%VIRTUAL_ENV%\\Scripts\\flake8 app.py"
             }
         }
 
         stage('Test') {
             steps {
-                bat """
-                    %VIRTUAL_ENV%\\Scripts\\pytest --maxfail=1 --disable-warnings -q
-                """
+                bat "%VIRTUAL_ENV%\\Scripts\\pytest --maxfail=1 --disable-warnings -q"
             }
         }
 
         stage('Coverage') {
             steps {
                 bat """
-                    rem === Run tests with coverage ===
                     %VIRTUAL_ENV%\\Scripts\\coverage run -m pytest
                     %VIRTUAL_ENV%\\Scripts\\coverage report
                 """
@@ -48,17 +41,13 @@ pipeline {
 
         stage('Security Scan') {
             steps {
-                bat """
-                    rem === Run Bandit for security scanning ===
-                    %VIRTUAL_ENV%\\Scripts\\bandit -r .
-                """
+                bat "%VIRTUAL_ENV%\\Scripts\\bandit -r ."
             }
         }
 
         stage('Deploy') {
             steps {
                 echo "Deploying application..."
-                // You can add real deployment steps here if required (e.g. copy to server)
             }
         }
     }
