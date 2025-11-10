@@ -9,11 +9,13 @@ pipeline {
         stage('Setup') {
             steps {
                 bat """
+                    rem Create virtual environment if it does not exist
                     if not exist %VIRTUAL_ENV% (
-                        python -m venv %VIRTUAL_ENV%
+                        py -m venv %VIRTUAL_ENV%
                     )
-                    call %VIRTUAL_ENV%\\Scripts\\activate.bat
-                    pip install -r requirements.txt
+
+                    rem Install dependencies using the venv's python
+                    %VIRTUAL_ENV%\\Scripts\\python -m pip install -r requirements.txt
                 """
             }
         }
@@ -21,8 +23,7 @@ pipeline {
         stage('Lint') {
             steps {
                 bat """
-                    call %VIRTUAL_ENV%\\Scripts\\activate.bat
-                    flake8 app.py
+                    %VIRTUAL_ENV%\\Scripts\\python -m flake8 app.py
                 """
             }
         }
@@ -30,8 +31,7 @@ pipeline {
         stage('Test') {
             steps {
                 bat """
-                    call %VIRTUAL_ENV%\\Scripts\\activate.bat
-                    pytest
+                    %VIRTUAL_ENV%\\Scripts\\python -m pytest
                 """
             }
         }
@@ -39,8 +39,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 bat """
-                    call %VIRTUAL_ENV%\\Scripts\\activate.bat
-                    python app.py
+                    %VIRTUAL_ENV%\\Scripts\\python app.py
                 """
             }
         }
