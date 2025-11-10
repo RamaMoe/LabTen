@@ -1,6 +1,5 @@
 pipeline {
     agent any
-
     environment {
         VIRTUAL_ENV = 'venv'
     }
@@ -9,12 +8,13 @@ pipeline {
         stage('Setup') {
             steps {
                 bat """
-                    rem Create virtual environment if it does not exist
+                    rem === Create virtual environment if it does not exist ===
                     if not exist %VIRTUAL_ENV% (
-                        py -m venv %VIRTUAL_ENV%
+                        python -m venv %VIRTUAL_ENV%
                     )
 
-                    rem Install dependencies using the venv's python
+                    rem === Upgrade pip and install dependencies ===
+                    %VIRTUAL_ENV%\\Scripts\\python -m pip install --upgrade pip
                     %VIRTUAL_ENV%\\Scripts\\python -m pip install -r requirements.txt
                 """
             }
@@ -31,16 +31,34 @@ pipeline {
         stage('Test') {
             steps {
                 bat """
-                    %VIRTUAL_ENV%\\Scripts\\python -m pytest
+                    %VIRTUAL_ENV%\\Scripts\\pytest --maxfail=1 --disable-warnings -q
+                """
+            }
+        }
+
+        stage('Coverage') {
+            steps {
+                bat """
+                    rem === Run tests with coverage ===
+                    %VIRTUAL_ENV%\\Scripts\\coverage run -m pytest
+                    %VIRTUAL_ENV%\\Scripts\\coverage report
+                """
+            }
+        }
+
+        stage('Security Scan') {
+            steps {
+                bat """
+                    rem === Run Bandit for security scanning ===
+                    %VIRTUAL_ENV%\\Scripts\\bandit -r .
                 """
             }
         }
 
         stage('Deploy') {
             steps {
-                bat """
-                    %VIRTUAL_ENV%\\Scripts\\python app.py
-                """
+                echo "Deploying application..."
+                // You can add real deployment steps here if required (e.g. copy to server)
             }
         }
     }
