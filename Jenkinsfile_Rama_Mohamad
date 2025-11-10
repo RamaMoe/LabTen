@@ -56,8 +56,25 @@ pipeline {
         }
 
         stage('Deploy') {
+            when {
+                branch 'main'
+            }
             steps {
-                echo "Deploying application..."
+                bat """
+                    echo === Building Docker image for deployment ===
+                    docker build -t python-ci-cd-app:%BUILD_NUMBER% .
+
+                    echo === Stopping any existing running container ===
+                    docker stop python-ci-cd-app 2>NUL || echo No running container to stop
+
+                    echo === Removing any old container ===
+                    docker rm python-ci-cd-app 2>NUL || echo No existing container to remove
+
+                    echo === Starting new container from fresh image ===
+                    docker run -d --name python-ci-cd-app -p 5000:5000 python-ci-cd-app:%BUILD_NUMBER%
+
+                    echo Deployment completed successfully.
+                """
             }
         }
     }
