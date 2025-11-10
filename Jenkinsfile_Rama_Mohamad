@@ -50,7 +50,7 @@ pipeline {
                 bat """
                     chcp 65001 >NUL
                     set PYTHONIOENCODING=utf-8
-                    %VIRTUAL_ENV%\\Scripts\\bandit -r . -f json -o bandit_report.json
+                    %VIRTUAL_ENV%\\Scripts\\bandit -r . -x %VIRTUAL_ENV%,tests -f json -o bandit_report.json
                 """
             }
         }
